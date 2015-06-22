@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Selective Color</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var canvas = document.body.firstElementChild;
+            var context = canvas.getContext('2d');
+            var img = document.createElement('img');
+            img.addEventListener('load', function () {
+                context.drawImage(img, 0, 0);
+                // get the image data
+                var image_data_object = context.getImageData(0, 0, img.width, img.height);
+                var arr = image_data_object.data;
+                img.getPixelIndex = function (pos) {
+                    // return the starting index for the pixel
+                    return this.width * pos[1] + pos[0];
+                };
+                context.putImageData(image_data_object, 0, 0);
+                canvas.addEventListener('mousedown', function (e) {
+                    context.drawImage(img, 0, 0);
+                    image_data_object = context.getImageData(0, 0, img.width, img.height);
+                    arr = image_data_object.data;
+                    var position = [e.clientX, e.clientY];
+                    console.log(position);
+                    // the getPixelIndex returns the pixel index
+                    // every pixel has 4 values, hence to get the
+                    // array index, multiply it by 4
+                    var index = img.getPixelIndex(position) * 4;
+                    var gr = 0;
+                    var interval = 100;
+                    var rmin = arr[index] - interval / 2;
+                    var rmax = arr[index] + interval / 2;
+                    var gmin = arr[index + 1] - interval / 2;
+                    var gmax = arr[index + 1]+ interval / 2;
+                    var bmin = arr[index + 2]- interval / 2;
+                    var bmax = arr[index + 2] + interval / 2;
+                    console.log(rmin);
+                    function match(i) {
+                        if (arr[i] >= rmin && arr[i] <= rmax &&
+                                arr[i + 1] >= gmin && arr[i + 1] <= gmax &&
+                                arr[i + 2] >= bmin && arr[i + 2] <= bmax) {
+                            // color match rules
+                        } else {
+                            // color does does not match
+                            gr = 0.21 * arr[i] + 0.72 * arr[i + 1] + 0.07 * arr[i + 2];
+                            arr[i + 2] = arr[i + 1] = arr[i] = ~~gr; // floor gr
+                        }
+                    }
+                    for (var i = 0; i < arr.length; i+=4) {
+                        match(i);
+                    }
+                    context.putImageData(image_data_object, 0, 0);
+                });
+            });
+            img.src = 'image/beach.jpg';
+            //img.src = 'image/apples.jpg';
+
+            function calculateMatch(rgb) {
+                var interval = 100;
+                var sum = rgb.reduce(function (ar, b) {return a + b;});
+                var intervals = rgb.map(function (component) {
+                    return interval * component / sum;
+                });
+                // check if the the numbers are within the interval
+                rgb.every(function () {
+                });
+            }
+        });
+        function rgbToHsl(r, g, b){
+            r /= 255, g /= 255, b /= 255;
+            var max = Math.max(r, g, b), min = Math.min(r, g, b);
+            var h, s, l = (max + min) / 2;
+            if(max == min){
+                h = s = 0; // achromatic
+            }else{
+                var d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch(max){
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return [Math.round( h * 360 ), s, l];
+        }
+    </script>
+</head>
+<body>
+<canvas height="600" width="1200"></canvas>
+</body>
+</html>

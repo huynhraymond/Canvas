@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var canvas = document.body.firstElementChild;
+            var context = canvas.getContext('2d');
+
+            var image = new Image();
+
+            image.addEventListener('load', function() {
+                context.drawImage(image, 0, 0);
+
+                // get image data
+                var image_data_object = context.getImageData(0, 0, image.width, image.height);
+
+                console.log('array length: ', image_data_object.data.length,
+                        '\npixels: ', image_data_object.data.length / 4);
+
+                console.log('image dimensions: ', image.width, image.height,
+                        '\nimage pixels: ', image.width * image.height);
+
+                var arr = image_data_object.data;
+                var row = 100;
+                var col = 200;
+                var pixels = 100;
+
+                for ( var i = row * image.width + col; i < row * image.width + col + pixels; i++ ) {
+                    // access the pixel information
+                    // r, g, b, a -> turn rgb to 0
+                    for ( var j = 0; j < 3; j++ ) {
+                        arr[i * 4 * j] = 0;
+                    }
+                }
+
+                context.putImageData(image_data_object, 0, 0);
+            });
+
+            image.src = 'image/beach.jpg';
+        });
+    </script>
+</head>
+<body>
+<canvas width="640" height="400">
+
+</canvas>
+</body>
+</html>

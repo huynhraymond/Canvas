@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script>
+        // Define the magnifying box
+        function Box(e, image) {
+            this.swidth = 100;
+            this.sheight = 100;
+            this.dheight = 100;
+            this.dwidth = 100;
+            this.sx = e.clientX * 2 - this.swidth / 2;
+            this.sy = e.clientY * 2 - this.sheight / 2;
+            this.dx = e.clientX - this.dwidth / 2;
+            this.dy = e.clientY - this.dheight / 2;
+            this.contextParams = [image, this.sx, this.sy, this.swidth, this.sheight, this.dx, this.dy, this.dwidth, this.dheight];
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var canvas = document.querySelector('canvas');
+            var context = canvas.getContext('2d');
+
+            var image = new Image();
+            image.addEventListener('load', function() {
+
+                console.log('image: ', image.width, image.height);
+
+                // draw the image with the dimensions reduced to half the size ...
+                //context.drawImage(image, 0, 0, image.width / 2, image.height / 2);
+
+                context.drawImage(image, 0, 0, image.width, image.height);
+
+                //document.body.appendChild(image);
+                //context.drawImage(image, 0, 0, 350, 350, 50, 50, 400, 400);
+                //context.drawImage(image, , 350, 200, 200, 400, 400, 200, 200);
+
+                // handle mouse moves
+                canvas.addEventListener('mousemove', function (e) {
+                    // clear the canvas
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    // draw the image
+                    context.drawImage(image, 0, 0, image.width / 2, image.height / 2);
+                    //context.drawImage(image, 0, 0, image.width, image.height);
+
+                    // draw the magnified box
+                    var box = new Box(e, image);
+                    console.log(box);
+                    context.drawImage.apply(context, box.contextParams);
+                });
+            });
+
+            image.src = 'beach.jpg';
+        });
+    </script>
+</head>
+<body>
+<canvas width="700" height="500">
+</canvas>
+</body>
+</html>

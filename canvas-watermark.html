@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('input[type="file"]').addEventListener('change', function() {
+            var files = Array.prototype.slice.call(this.files);
+
+            var canvas = document.querySelector('canvas');
+            var context = canvas.getContext('2d');
+
+            var ulLink = document.querySelector('ul.link');
+            while( ulLink.firstChild) { ulLink.removeChild(ulLink.firstChild); }
+
+            files.forEach(function(file, index) {
+                var fileReader = new FileReader();
+
+                fileReader.onload = function() {
+                    var img = new Image();
+
+                    img.addEventListener('load', function() {
+                        var width = img.width / 5;
+                        var height = img.height / 5;
+                        context.drawImage(img, 0, 0, width, height);
+                        context.font = '16px Helvetica Neue';
+                        context.fillStyle = 'rgb(54, 83, 142)';
+
+
+                        context.fillText('Cuxi Huynh', 20, height - 20);
+
+                        var a = document.createElement('a');
+                        a.href = canvas.toDataURL('image/jpeg');
+
+                        context.clearRect(0, 0, img.width, img.height);
+
+                        a.setAttribute('download', file.name);
+                        a.textContent = 'Download ' + file.name;
+
+                        var li = document.createElement('li');
+                        li.appendChild(a);
+                        ulLink.appendChild(li);
+                    });
+
+                    img.src = fileReader.result;
+                };
+
+                fileReader.readAsDataURL(file);
+            });
+        });
+    });
+</script>
+<body>
+<div>
+    <input type="file" multiple/>
+</div>
+
+<ul class="link"></ul>
+
+<canvas width="1200" height="600"></canvas>
+</body>
+</html>

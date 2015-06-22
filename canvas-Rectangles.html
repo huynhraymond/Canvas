@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        canvas {
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 0 20px 5px gray;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var canvas = document.querySelector('canvas');
+            var context = canvas.getContext('2d');
+
+            var canvasRect = canvas.getBoundingClientRect();
+
+            // Note: the offset is dependent on existing browser size - offset change if browser resize
+            var offset = new Point(canvasRect.left, canvasRect.top);
+            console.log('offset: ', offset);
+
+            canvas.addEventListener('mousedown', function(e) {
+
+
+            });
+
+            function moveHandler(e) {
+                moveHandler.dimensions = (new Point(e.clientX, e.clientY)).normalize(offset).diff(moveHandler.start);
+                console.log('moveHandler.dimensions: ', moveHandler.dimensions);
+            }
+
+            function Point(x, y) { this.coords = [x, y]; }
+
+            Point.prototype.diff = function(b) {
+                var a = this;
+
+                return this.coords.map(function(coord, index) {
+                    return coord - b.coords[index];
+                });
+            };
+
+            Point.prototype.normalize = function(offset) {
+                // Take in an offset point and normalizes the coords property
+                this.coords = this.diff(offset);
+                return this;
+            };
+
+            /*
+            function normalize(arr) {
+                return arr.map(function(val, index) {
+                    return val - offset[index];
+                });
+            }   */
+        });
+
+    </script>
+</head>
+<body>
+<canvas width="600" height="400"></canvas>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas Color Picker</title>
+    <meta name="description" content="This document allows the user to select a color
+        in an image and it prints out other pixels (within a range of the hue) and converts the rest of
+        the pixles to grayscale.
+    "/>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #source {
+            margin-right: 2em;
+        }
+        #target {
+            border: 1px solid gray;
+        }
+        #slider {
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+<canvas id="source"></canvas>
+<canvas id="target" height="300" width="300"></canvas>
+<script>
+    /***
+     * capture the pixel under the cursor at the source canvas and apply it on the target
+     * */
+    var srccanv = document.getElementById('source');
+    var srccontext = srccanv.getContext('2d');
+    srccanv.height = srccanv.width = 300;
+    var targetcanv = document.getElementById('target');
+    var targetcontext = targetcanv.getContext('2d');
+    var slider = document.getElementById('slider');
+    // load the image
+    var img = new Image();
+    img.addEventListener('load', function () {
+        srccontext.drawImage(img, 0, 0, srccanv.width, srccanv.height);
+        targetcontext.drawImage(img, 0, 0, srccanv.width, srccanv.height);
+    });
+    img.src = 'imgage/apples.jpg';
+    // capture a mousemove on the source
+    srccanv.addEventListener('mousemove', function(event) {
+        // get the pixel at that location - assumes that the window origin is the same as the
+        // canvas origin i.e. canvas is flush against the top left of the window
+        var pixel = srccontext.getImageData(event.clientX, event.clientY, 1, 1).data;
+        // draw the image again, on the target
+        targetcontext.drawImage(img, 0, 0, srccanv.width, srccanv.height);
+        // convert the pixel data to hsl - rgb can be clumsy for a fine grained control
+        var _h = rgbToHsl(pixel[0], pixel[1], pixel[2])[0]; // access the hue of the pixel
+        // todo: change the range to see the effect on a wider range of pixels
+        var range = 40;
+        var _hmax = _h + range, _hmin = _h - range;
+        var image_data = targetcontext.getImageData(0,0,300,300);
+        var pixels = image_data.data;
+        for (var i = 0, len = pixels.length; i < len; i+=4) {
+            var r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
+            var hsl = rgbToHsl(r, g, b), h = hsl[0]; // Access hue of the current pixel
+            if ( ((h > _hmax) || (h < _hmin))) {
+                pixels[i] = pixels[i + 1] = pixels[i + 2] = ( pixels[i] + pixels[i + 1] + pixels[i + 2] ) / 3;
+            }
+        }
+        targetcontext.putImageData(image_data, 0, 0);
+    });
+    function rgbToHsl(r, g, b){
+        r /= 255, g /= 255, b /= 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        var h, s, l = (max + min) / 2;
+        if(max == min){
+            h = s = 0; // achromatic
+        }else{
+            var d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch(max){
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+        return [Math.round( h * 360 ), s, l];
+    }
+</script>
+</body>
+</html>

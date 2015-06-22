@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var canvas = document.body.firstElementChild;
+            var context = canvas.getContext('2d');
+
+            var image = new Image();
+
+            image.addEventListener('load', function() {
+                context.drawImage(image, 0, 0);
+
+                // get image data
+                var image_data_object = context.getImageData(0, 0, image.width, image.height);
+
+                var arr = image_data_object.data;
+
+                image.getPixelIndex = function(pos) {
+                    // return the starting index for the pixel
+                    return this.width * pos[1] + pos[0];
+                };
+
+                canvas.addEventListener('mousedown', function(e) {
+                    var position = [e.clientX, e.clientY];
+                    //console.log('position: ', position);
+
+                    // getPixelIndex return the pixel index
+                    // every pixel has 4 values - hence multiply by 4 to get array index
+                    var index = image.getPixelIndex(position) * 4;
+                    var gr = 0;
+                    var interval = 50;
+                    var rmin = arr[index] - interval / 2;
+                    var rmax = arr[index] + interval / 2;
+                    var gmin = arr[index + 1] - interval / 2;
+                    var gmax = arr[index + 1] + interval / 2;
+                    var bmin = arr[index + 2] - interval / 2;
+                    var bmax = arr[index + 2] + interval / 2;
+
+                    function match(i) {
+                        if (arr[i] >= rmin && arr[i] <= rmax &&
+                            arr[i + 1] >= gmin && arr[i + 1] <= gmax &&
+                            arr[i + 2] >= bmin && arr[i + 2] <= bmax) {
+
+                        }
+
+                        else {
+                            // color does not in range of redefined color scheme
+                            gr = 0.21 * arr[i] + 0.72 * arr[i + 1] + 0.07 * arr[i + 2];
+                            arr[i + 2] = arr[i + 1] = arr[i] = ~~gr;
+                        }
+                    }
+
+                    for ( var i = 0; i < arr.length; i += 4 ) { match(i); }
+
+                    context.putImageData(image_data_object, 0, 0);
+
+                });
+            });
+
+            image.src = 'beach.jpg';
+        });
+    </script>
+</head>
+<body>
+<canvas width="640" height="400">
+
+</canvas>
+</body>
+</html>
